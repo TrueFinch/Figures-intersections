@@ -119,7 +119,7 @@ class PolyLine : Figure {
  public:
 	double length() const override;
 
-	vector<Point> *getPoints() const;
+	vector<Point>& getPoints() const;
 
 	vector<Point> intersect(const Segment&) const override;
 
@@ -129,10 +129,10 @@ class PolyLine : Figure {
 
 	vector<Point> intersect(const Figure&) const override;
 
-	explicit PolyLine(vector<Point> *points);
+	explicit PolyLine(const vector<Point>& points);
  private:
 	void setLength();
-	vector<Point> *points_;
+	vector<Point> points_;
 	double len_;
 };
 } // end namespace figures
