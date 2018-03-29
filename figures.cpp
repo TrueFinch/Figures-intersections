@@ -2,8 +2,10 @@
 //#define _USE_MATH_DEFINES
 #include <cmath>
 #include <utility>
+#include <set>
 
 using std::cout;
+using std::set;
 using namespace figures;
 //namespace figures {
 
@@ -293,7 +295,27 @@ vector<Point> PolyLine::intersect(const Circle& _cc) const {
 }
 
 vector<Point> PolyLine::intersect(const PolyLine& _cp) const {
+	set<Point> tmp_set;
+	vector<Point> tmp_vector, points1 = this->getPoints(), points2 = _cp.getPoints(),  answer;
 
+	for (auto i = 0; i < points1.size() - 1; ++i) {
+		Segment segment = Segment(points1[i], points1[i + 1]);
+		for (auto j = 0; j < points2.size() - 1; ++j) {
+			tmp_vector = segment.intersect(Segment(points2[j], points2[j + 1]));
+			for (auto point : tmp_vector) {
+				tmp_set.insert(point);
+			}
+		}
+	}
+
+	if (tmp_set.empty()) {
+		return answer;
+	} else {
+		for (auto it : tmp_set) {
+			answer.push_back(it);
+		}
+		return answer;
+	}
 }
 
 vector<Point> PolyLine::intersect(const Figure& _cf) const {
