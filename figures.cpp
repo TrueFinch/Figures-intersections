@@ -118,7 +118,7 @@ vector<Point> Segment::intersect(const Circle& _cc) const {
 
 	vector<double> v = this->getParametrs();
 	double a1 = v[0], b1 = v[1], c1 = v[2];
-	
+
 	double
 			p = _cc.getCenter().getX(),
 			q = _cc.getCenter().getY(),
@@ -152,7 +152,7 @@ vector<Point> Segment::intersect(const Circle& _cc) const {
 }
 
 vector<Point> Segment::intersect(const PolyLine& _cp) const {
-	vector<Point> answer, tmp, points = *_cp.getPoints();
+	vector<Point> answer, tmp, points = _cp.getPoints();
 	for (int i = 0; i < points.size() - 1; ++i) {
 		tmp = Segment(points[i], points[i + 1]).intersect(*this);
 		for (auto j : tmp) {
@@ -250,7 +250,7 @@ vector<Point> Circle::intersect(const Circle& _cc) const {
 };
 
 vector<Point> Circle::intersect(const PolyLine& _cp) const {
-	vector<Point> answer, tmp, points = *_cp.getPoints();
+	vector<Point> answer, tmp, points = _cp.getPoints();
 	for (int i = 0; i < points.size() - 1; ++i) {
 		tmp = Segment(points[i], points[i + 1]).intersect(*this);
 		for (auto j : tmp) {
@@ -275,24 +275,31 @@ double PolyLine::length() const {
 
 void PolyLine::setLength() {
 	this->len_ = 0;
-	vector<Point> p = *this->points_;
-	for (int i = 0; i < p.size() - 1; ++i) {
-		this->len_ += Segment(p[i], p[i + 1]).length();
+	for (int i = 0; i < this->points_.size() - 1; ++i) {
+		this->len_ += Segment(this->points_[i], this->points_[i + 1]).length();
 	}
 }
 
-vector<Point> *PolyLine::getPoints() const {
+vector<Point>& PolyLine::getPoints() const {
 	return this->points_;
 }
 
-vector<Point> PolyLine::intersect(const Segment& _cs) const {}
+vector<Point> PolyLine::intersect(const Segment& _cs) const {
+	return _cs.intersect(*this);
+}
 
-vector<Point> PolyLine::intersect(const Circle& _cc) const {}
+vector<Point> PolyLine::intersect(const Circle& _cc) const {
+	return _cc.intersect(*this);
+}
 
-vector<Point> PolyLine::intersect(const PolyLine& _cp) const {}
+vector<Point> PolyLine::intersect(const PolyLine& _cp) const {
 
-vector<Point> PolyLine::intersect(const Figure& _cf) const {}
+}
 
-PolyLine::PolyLine(vector<Point> *points) : points_{points} {
+vector<Point> PolyLine::intersect(const Figure& _cf) const {
+	return _cf.intersect(*this);
+}
+
+PolyLine::PolyLine(const vector<Point>& points) : points_{points} {
 	this->setLength();
 }
