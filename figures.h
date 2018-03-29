@@ -13,7 +13,7 @@ class Point;
 
 class Figure;
 
-class Line;
+class Segment;
 
 class Circle;
 
@@ -21,94 +21,119 @@ class PolyLine;
 
 class Point {
  public:
-  void setX(double x);
+	void setX(const double& x);
 
-  void setY(double y);
+	void setY(const double& y);
 
-  double getX();
+	double getX() const;
 
-  double getY();
+	double getY() const;
 
-  Point(double x, double y);
+	Point(const double& x, const double& y);
 
  private:
-  double x_;
-  double y_;
+	double x_;
+	double y_;
 };
 
 class Figure {
  public:
-  virtual int length() = 0;
+	virtual double length() const = 0;
 
-  virtual vector<Point> intersect(Line &) = 0;
+	virtual vector<Point> intersect(const Segment&) const = 0;
 
-  virtual vector<Point> intersect(Circle &) = 0;
+	virtual vector<Point> intersect(const Circle&) const = 0;
 
-  virtual vector<Point> intersect(PolyLine &) = 0;
+	virtual vector<Point> intersect(const PolyLine&) const = 0;
 
-  virtual vector<Point> intersect(Figure &) = 0;
+	virtual vector<Point> intersect(const Figure&) const = 0;
+
+	virtual ~Figure() = default;
 };
 
-class Line : Figure {
+class Segment : Figure {
  public:
-  void setPointA(Point p);
+	void setPointA(const Point& p);
 
-  void setPointB(Point p);
+	void setPointB(const Point& p);
 
-  Point getPointA();
+	Point getPointA() const;
 
-  Point getPointB();
+	Point getPointB() const;
 
-  vector<double> getParametrs();
+	vector<double> getParametrs() const;
 
-  void setParametrs();
+	double length() const override;
 
-  virtual int length();
+	vector<Point> intersect(const Segment&) const override;
 
-  virtual vector<Point> intersect(Line &);
+	vector<Point> intersect(const Circle&) const override;
 
-  virtual vector<Point> intersect(Circle &);
+	vector<Point> intersect(const PolyLine&) const override;
 
-  virtual vector<Point> intersect(PolyLine &);
+	vector<Point> intersect(const Figure&) const override;
 
-  virtual vector<Point> intersect(Figure &);
-
-  Line(Point a, Point b);
+	Segment(const Point& a, const Point& b);
 
  private:
-  Point pa_;
-  Point pb_;
-  double a_, b_, c_;
+	void recalculateParametrs();
+
+	void recalculateLength();
+
+	Point pa_;
+	Point pb_;
+	double a_, b_, c_, len_;
 };
 
 class Circle : Figure {
  public:
-  void setCenter(Point c);
+	void setCenter(const Point& c);
 
-  void setRadius(Point c);
+	Point getCenter() const;
 
-  Point getCenter();
+	void setRadius(const double& r);
 
-  int getRadius();
+	double getRadius() const;
 
-  virtual int length();
+	double length() const override;
 
-  virtual vector<Point> intersect(Line &);
+	vector<Point> intersect(const Segment&) const override;
 
-  virtual vector<Point> intersect(Circle &);
+	vector<Point> intersect(const Circle&) const override;
 
-  virtual vector<Point> intersect(PolyLine &);
+	vector<Point> intersect(const PolyLine&) const override;
 
-  virtual vector<Point> intersect(Figure &);
+	vector<Point> intersect(const Figure&) const override;
+
+	Circle(const Point& c, const double& r);
 
  private:
-  Point c_;
-  int r_;
+	void recalculateLength();
 
+	Point c_;
+	double r_;
+	double len_;
 };
 
-class Polyline : Figure {
+class PolyLine : Figure {
+ public:
+	double length() const override;
 
+	vector<Point> *getPoints() const;
+
+	vector<Point> intersect(const Segment&) const override;
+
+	vector<Point> intersect(const Circle&) const override;
+
+	vector<Point> intersect(const PolyLine&) const override;
+
+	vector<Point> intersect(const Figure&) const override;
+
+	explicit PolyLine(vector<Point> *points);
+ private:
+	void setLength();
+	vector<Point> *points_;
+	double len_;
 };
 } // end namespace figures
 #endif //INTERSECTIONS_FIGURES_H
