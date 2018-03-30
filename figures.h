@@ -1,7 +1,8 @@
 #ifndef INTERSECTIONS_FIGURES_H
 #define INTERSECTIONS_FIGURES_H
 
-#include "figures.h"
+#define EPS 10e-16
+
 #include <vector>
 #include <iostream>
 
@@ -53,15 +54,15 @@ class Figure {
 
 class Segment : Figure {
  public:
-	void setPointA(const Point& p);
+	void setA(const Point& p);
 
-	void setPointB(const Point& p);
+	void setB(const Point& p);
 
-	Point getPointA() const;
+	Point getA() const;
 
-	Point getPointB() const;
+	Point getB() const;
 
-	vector<double> getParametrs() const;
+	vector<double> getParameters() const;
 
 	double length() const override;
 
@@ -76,7 +77,7 @@ class Segment : Figure {
 	Segment(const Point& a, const Point& b);
 
  private:
-	void recalculateParametrs();
+	void recalculateParameters();
 
 	void recalculateLength();
 
@@ -119,7 +120,7 @@ class PolyLine : Figure {
  public:
 	double length() const override;
 
-	vector<Point>& getPoints() const;
+	vector<Point> getPoints() const;
 
 	vector<Point> intersect(const Segment&) const override;
 
