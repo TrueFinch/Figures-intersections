@@ -1,13 +1,18 @@
 #include "figures.h"
-//#define _USE_MATH_DEFINES
 #include <cmath>
 #include <utility>
 #include <set>
+#include <numeric>
 
 using std::cout;
 using std::set;
 using namespace figures;
-//namespace figures {
+
+struct comparePoints {
+	bool operator()(const Point& a, const Point& b) {
+		return ((a.getX() < b.getX()) && (a.getY() < b.getY()));
+	}
+};
 
 void Point::setX(const double& x) {
 	this->x_ = x;
@@ -25,36 +30,123 @@ double Point::getY() const {
 	return this->y_;
 }
 
+bool Point::belong(const Point& _cp) const {
+	return *this == _cp;
+}
+
+bool Point::belong(const Segment& _cs) const {
+	return this->intersect(_cs)[0] == *this;
+}
+
+bool Point::belong(const Circle& _cc) const {
+	return this->intersect(_cc)[0] == *this;
+}
+
+bool Point::belong(const PolyLine& _cp) const {
+	return this->intersect(_cp)[0] == *this;
+}
+
+bool Point::belong(const Figure& _cf) const {
+	return this->intersect(_cf)[0] == *this;
+}
+
 Point::Point(const double& x, const double& y) : x_{x}, y_{y} {}
 
-void Segment::setPointA(const Point& p) {
+const bool Point::operator==(const Point& rhs) const {
+	return ((this->getX() == rhs.getX()) && (this->getY() == rhs.getY()));
+}
+
+vector<Point> Point::intersect(const figures::Point& _cp) const {
+	vector<Point> answer;
+	if (*this == _cp) {
+		answer.emplace_back(*this);
+	} else {
+		answer.emplace_back(Point(this->getX() * (-1), this->getY() * (-1)));
+	}
+	return answer;
+}
+
+vector<Point> Point::intersect(const Segment& _cs) const {
+	vector<Point> answer;
+	vector<double> p = _cs.getParameters();
+	double a = p[0], b = p[1], c = p[2];
+	if ((a * this->getX() + b * this->getY() + c) == 0){
+		answer.emplace_back(*this);
+	} else {
+		answer.emplace_back(Point(this->getX() * (-1), this->getY() * (-1)));
+	}
+	return answer;
+}
+
+vector<Point> Point::intersect(const Circle& _cc) const {
+	vector<Point> answer;
+	Point c = _cc.getCenter();
+	double r = _cc.getRadius();
+	if ((pow(this->getX() - c.getX(), 2) + pow(this->getY() - c.getY(), 2) == pow(r, 2))) {
+		answer.emplace_back(*this);
+	} else {
+		answer.emplace_back(Point(this->getX() * (-1), this->getY() * (-1)));
+	}
+	return answer;
+}
+
+vector<Point> Point::intersect(const PolyLine& _cp) const {
+	vector<Point> answer, points = _cp.getPoints();
+	for (int i = 0; i < points.size() - 1; ++i) {
+		if (this->intersect(Segment(points[i], points[i + 1]))[0] == *this) {
+			continue;
+		} else {
+			answer.emplace_back(Point(this->getX() * (-1), this->getY() * (-1)));
+			return answer;
+		}
+	}
+	answer.emplace_back(*this);
+	return answer;
+}
+
+vector<Point> Point::intersect(const Figure& _cf) const {
+	return _cf.intersect(*this);
+}
+
+double Point::length() const {
+	return 42;
+}
+
+void Segment::setA(const Point& p) {
 	this->pa_ = p;
-	this->recalculateParametrs();
+	this->recalculateParameters();
 	this->recalculateLength();
 }
 
-Point Segment::getPointA() const {
+Point Segment::getA() const {
 	return this->pa_;
 }
 
-void Segment::setPointB(const Point& p) {
+void Segment::setB(const Point& p) {
 	this->pb_ = p;
-	this->recalculateParametrs();
+	this->recalculateParameters();
 	this->recalculateLength();
 }
 
-Point Segment::getPointB() const {
+Point Segment::getB() const {
 	return this->pb_;
 }
 
-void Segment::recalculateParametrs() {
-	this->a_ = this->getPointA().getY() - this->getPointB().getY();
-	this->b_ = this->getPointB().getX() - this->getPointA().getX();
-	this->c_ = this->getPointA().getX() * this->getPointB().getY()
-			- this->getPointB().getX() * this->getPointA().getY();
+void Segment::recalculateParameters() {
+	this->a_ = this->getA().getY() - this->getB().getY();
+	this->b_ = this->getB().getX() - this->getA().getX();
+	this->c_ = this->getA().getX() * this->getB().getY() - this->getB().getX() * this->getA().getY();
+	if (this->a_ < 0) {
+		this->a_ *= (-1);
+		this->b_ *= (-1);
+		this->c_ *= (-1);
+	} else if ((this->b_ < 0) && (this->a_ == 0)) {
+		this->b_ *= (-1);
+		this->c_ *= (-1);
+	}
 }
 
-vector<double> Segment::getParametrs() const {
+vector<double> Segment::getParameters() const {
 	vector<double> v;
 	v.push_back(this->a_);
 	v.push_back(this->b_);
@@ -63,33 +155,37 @@ vector<double> Segment::getParametrs() const {
 }
 
 void Segment::recalculateLength() {
-	this->len_ = sqrt(pow(this->getPointB().getX() - this->getPointA().getX(), 2)
-												+ pow(this->getPointB().getY() - this->getPointA().getY(), 2));
+	this->len_ = sqrt(pow(this->getB().getX() - this->getA().getX(), 2)
+												+ pow(this->getB().getY() - this->getA().getY(), 2));
 }
 
 double Segment::length() const {
 	return this->len_;
 }
 
+vector<Point> Segment::intersect(const Point& _cp) const {
+	return _cp.intersect(*this);
+}
+
 vector<Point> Segment::intersect(const Segment& _cs) const {
 	vector<Point> answer;
 
-	vector<double> p = this->getParametrs();
+	vector<double> p = this->getParameters();
 	double a1 = p[0], b1 = p[1], c1 = p[2];
 	p.clear();
 
-	p = _cs.getParametrs();
+	p = _cs.getParameters();
 	double a2 = p[0], b2 = p[1], c2 = p[2];
 	p.clear();
 
-	if ((a1 == a2) && (b1 == b2)) {
+	if ((a1 == a2) || (b1 == b2)) {
 		if (c1 == c2) {
 			// Segment are located on same line
 			double
-					x1 = this->getPointA().getX(), y1 = this->getPointA().getY(),
-					x2 = this->getPointB().getX(), y2 = this->getPointB().getY(),
-					x3 = _cs.getPointA().getX(), y3 = _cs.getPointA().getY(),
-					x4 = _cs.getPointB().getX(), y4 = _cs.getPointB().getY();
+					x1 = this->getA().getX(), y1 = this->getA().getY(),
+					x2 = this->getB().getX(), y2 = this->getB().getY(),
+					x3 = _cs.getA().getX(), y3 = _cs.getA().getY(),
+					x4 = _cs.getB().getX(), y4 = _cs.getB().getY();
 			if (((x3 - x1) * (x4 - x1) + (y3 - y1) * (y4 - y1)) <= 0) {
 				answer.emplace_back(Point(x1, y1));
 			} else if (((x3 - x2) * (x4 - x2) + (y3 - y2) * (y4 - y2)) <= 0) {
@@ -118,7 +214,7 @@ vector<Point> Segment::intersect(const Segment& _cs) const {
 vector<Point> Segment::intersect(const Circle& _cc) const {
 	vector<Point> answer;
 
-	vector<double> v = this->getParametrs();
+	vector<double> v = this->getParameters();
 	double a1 = v[0], b1 = v[1], c1 = v[2];
 
 	double
@@ -127,30 +223,27 @@ vector<Point> Segment::intersect(const Circle& _cc) const {
 			r = _cc.getRadius(),
 			d = pow(fabs(a1 * p + b1 * q + c1), 2) / (a1 * a1 + b1 * b1);
 
-	if (d > r) {
-		return answer;
-	}
-	double
-			k = (-1) * a1 / b1,
-			b = (-1) * c1 / b1,
-			t = q - b,
-			x = (p + k * t) / (1 + k * k),
-			y = k * x + b;
-	if (d == r) {
-		answer.emplace_back(Point(x, y));
-		return answer;
-	}
-	if (d < r) {
+	if (d <= r) {
 		double
-				u = sqrt((2 * k + t) * t - (p * p - r * r) * k * k + r * r) / (1 + k * k),
-				x1 = x + u,
-				y1 = k * x1,
-				x2 = x - u,
-				y2 = k * x2;
-		answer.emplace_back(Point(x1, y1));
-		answer.emplace_back(Point(x2, y2));
-		return answer;
+				k = (-1) * a1 / b1,
+				b = (-1) * c1 / b1,
+				t = q - b,
+				x = (p + k * t) / (1 + k * k),
+				y = k * x + b;
+		if (d == r) {
+			answer.emplace_back(Point(x, y));
+		} else if (d < r) {
+			double
+					u = sqrt((2 * k + t) * t - (p * p - r * r) * k * k + r * r) / (1 + k * k),
+					x1 = x + u,
+					y1 = k * x1,
+					x2 = x - u,
+					y2 = k * x2;
+			answer.emplace_back(Point(x1, y1));
+			answer.emplace_back(Point(x2, y2));
+		}
 	}
+	return answer;
 }
 
 vector<Point> Segment::intersect(const PolyLine& _cp) const {
@@ -170,7 +263,7 @@ vector<Point> Segment::intersect(const Figure& _cf) const {
 };
 
 Segment::Segment(const Point& a, const Point& b) : pa_{a}, pb_{b} {
-	this->recalculateParametrs();
+	this->recalculateParameters();
 	this->recalculateLength();
 }
 
@@ -197,6 +290,10 @@ void Circle::recalculateLength() {
 
 double Circle::length() const {
 	return this->len_;
+}
+
+vector<Point> Circle::intersect(const Point& _cp) const {
+	return _cp.intersect(*this);
 }
 
 vector<Point> Circle::intersect(const Segment& _cs) const {
@@ -244,11 +341,10 @@ vector<Point> Circle::intersect(const Circle& _cc) const {
 			y2 = (u - v) / (2 * cx2) + x2;
 
 	answer.emplace_back(Point(x1, y1));
-	if ((x1 == x2) and (y1 == y2)) {
-		return answer;
-	} else {
+	if ((x1 != x2) and (y1 != y2)) {
 		answer.emplace_back(Point(x2, y2));
 	}
+	return answer;
 };
 
 vector<Point> Circle::intersect(const PolyLine& _cp) const {
@@ -282,8 +378,12 @@ void PolyLine::setLength() {
 	}
 }
 
-vector<Point>& PolyLine::getPoints() const {
+vector<Point> PolyLine::getPoints() const {
 	return this->points_;
+}
+
+vector<Point> PolyLine::intersect(const Point& _cp) const {
+	return _cp.intersect(*this);
 }
 
 vector<Point> PolyLine::intersect(const Segment& _cs) const {
@@ -295,14 +395,14 @@ vector<Point> PolyLine::intersect(const Circle& _cc) const {
 }
 
 vector<Point> PolyLine::intersect(const PolyLine& _cp) const {
-	set<Point> tmp_set;
-	vector<Point> tmp_vector, points1 = this->getPoints(), points2 = _cp.getPoints(),  answer;
+	set<Point, comparePoints> tmp_set;
+	vector<Point> tmp_vector, points1 = this->getPoints(), points2 = _cp.getPoints(), answer;
 
 	for (auto i = 0; i < points1.size() - 1; ++i) {
 		Segment segment = Segment(points1[i], points1[i + 1]);
 		for (auto j = 0; j < points2.size() - 1; ++j) {
 			tmp_vector = segment.intersect(Segment(points2[j], points2[j + 1]));
-			for (auto point : tmp_vector) {
+			for (const auto& point : tmp_vector) {
 				tmp_set.insert(point);
 			}
 		}

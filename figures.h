@@ -20,26 +20,11 @@ class Circle;
 
 class PolyLine;
 
-class Point {
- public:
-	void setX(const double& x);
-
-	void setY(const double& y);
-
-	double getX() const;
-
-	double getY() const;
-
-	Point(const double& x, const double& y);
-
- private:
-	double x_;
-	double y_;
-};
-
 class Figure {
  public:
 	virtual double length() const = 0;
+
+	virtual vector<Point> intersect(const Point&) const = 0;
 
 	virtual vector<Point> intersect(const Segment&) const = 0;
 
@@ -50,6 +35,46 @@ class Figure {
 	virtual vector<Point> intersect(const Figure&) const = 0;
 
 	virtual ~Figure() = default;
+};
+
+class Point : Figure {
+ public:
+	void setX(const double& x);
+
+	void setY(const double& y);
+
+	double getX() const;
+
+	double getY() const;
+
+	bool belong(const Point& _cp) const;
+
+	bool belong(const Segment& _cs) const;
+
+	bool belong(const Circle& _cc) const;
+
+	bool belong(const PolyLine& _cp) const;
+
+	bool belong(const Figure& _cf) const;
+
+	vector<Point> intersect(const Point&) const override;
+
+	vector<Point> intersect(const Segment&) const override;
+
+	vector<Point> intersect(const Circle&) const override;
+
+	vector<Point> intersect(const PolyLine&) const override;
+
+	vector<Point> intersect(const Figure&) const override;
+
+	Point(const double& x, const double& y);
+
+	const bool operator==(const Point& rhs) const;
+ private:
+	double length() const override;
+
+	double x_;
+	double y_;
 };
 
 class Segment : Figure {
@@ -65,6 +90,8 @@ class Segment : Figure {
 	vector<double> getParameters() const;
 
 	double length() const override;
+
+	vector<Point> intersect(const Point&) const override;
 
 	vector<Point> intersect(const Segment&) const override;
 
@@ -98,6 +125,8 @@ class Circle : Figure {
 
 	double length() const override;
 
+	vector<Point> intersect(const Point&) const override;
+
 	vector<Point> intersect(const Segment&) const override;
 
 	vector<Point> intersect(const Circle&) const override;
@@ -121,6 +150,8 @@ class PolyLine : Figure {
 	double length() const override;
 
 	vector<Point> getPoints() const;
+
+	vector<Point> intersect(const Point&) const override;
 
 	vector<Point> intersect(const Segment&) const override;
 
