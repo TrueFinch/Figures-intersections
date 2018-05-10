@@ -78,7 +78,7 @@ class Circle: Figure {
 class Polyline: Figure {
  public:
   Polyline() = default;
-  Polyline(const vector<Point>& points);
+  explicit Polyline(const vector<Point>& points);
   vector<Point> getPoints() const;
   double length() const override;
   bool belong(const Point&) const override;
@@ -89,7 +89,7 @@ class Polyline: Figure {
  private:
   void recalculateLength();
   vector<Point> points_;
-  double len_;
+  double length_ = 0;
 };
 } // end namespace figures
 
