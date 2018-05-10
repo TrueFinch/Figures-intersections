@@ -237,7 +237,6 @@ vector<Point> Circle::intersect(const figures::Polyline& _cp) const {
         answer.push_back(item);
       }
     }
-//    tmp.clear();
   }
   return answer;
 }
@@ -250,7 +249,7 @@ Polyline::Polyline(const vector<figures::Point>& points) : points_{points} {
 
 vector<Point> Polyline::getPoints() const { return points_; }
 
-double Polyline::length() const { return len_; }
+double Polyline::length() const { return length_; }
 
 bool Polyline::belong(const figures::Point& point) const {
   bool res;
@@ -269,11 +268,33 @@ vector<Point> Polyline::intersect(const Segment& _cs) const { return _cs.interse
 
 vector<Point> Polyline::intersect(const Circle& _cc) const { return _cc.intersect(*this); }
 
-vector<Point> Polyline::intersect(const Polyline& _cp) const { return _cp.intersect(*this); }
+vector<Point> Polyline::intersect(const Polyline& _cp) const {
+  vector<Point> answer, points1(_cp.getPoints()), points2(this->getPoints());
+  for (int i = 0; i < points2.size() - 1; ++i) {
+    Segment segment(points2[i], points2[i + 1]);
+    for (int j = 0; j < points1.size() - 1; ++j) {
+      vector<Point> tmp = segment.intersect(Segment(points1[j], points1[j + 1]));
+      for (auto& item : tmp) {
+        bool flag = true;
+        for (int k = 0; flag && (k < answer.size()); ++k) {
+          if (item == answer[k]) {
+            flag = false;
+          }
+        }
+        if (flag) {
+          answer.push_back(item);
+        }
+      }
+    }
+//    tmp.clear();
+  }
+  return answer;
+}
 
 void Polyline::recalculateLength() {
-  len_ = 0.0;
+  double len = 0.0;
   for (int i = 0; i < points_.size() - 1; ++i) {
-    len_ += Segment(points_[i], points_[i + 1]).length();
+    len += Segment(points_[i], points_[i + 1]).length();
   }
+  length_ = len;
 }
