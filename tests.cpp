@@ -184,6 +184,32 @@ TEST_CASE("Circle's tests", "[]") {
       REQUIRE(!circle.belong(point));
     }
   }
+  SECTION("Circle circle intersection 1") {
+    Circle c1(Point(-3.0, 0.0), 3.0), c2(Point(0.0, 3.0), 3.0);
+    vector<Point> exp_points{Point(-3.0, 3.0), Point(0.0, 0.0)};
+    auto exp_vec_size = (int) exp_points.size();
+    vector<Point> res(c1.intersect(c2));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
+  SECTION("Circle circle intersection 2") {
+    Circle c1(Point(0.0, 3.0), 3.0), c2(Point(6.0, 3.0), 3.0);
+    vector<Point> exp_points{Point(3.0, 3.0)};
+    auto exp_vec_size = (int) exp_points.size();
+    vector<Point> res(c1.intersect(c2));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
+  SECTION("Circle circle intersection 3") {
+    Circle c1(Point(-3.0, 0.0), 3.0), c2(Point(6.0, 3.0), 3.0);
+    int exp_vec_size = 0;
+    vector<Point> res(c1.intersect(c2));
+    REQUIRE(res.size() == exp_vec_size);
+  }
   Circle circle(Point(-1.0, 4.0), 3.0);
   SECTION("Circle polyline intersection 1") {
     Polyline polyline(vector<Point>{Point(-5.0, 4.0), Point(-3.0, 4.0), Point(-1.0, 6.0),
@@ -225,6 +251,17 @@ TEST_CASE("Polyline's tests", "[]") {
       REQUIRE(!polyline.belong(point));
     }
   }
+  SECTION("Polyline circle intersection 1") {
+    Circle circle(Point(0.0, 0.0), 4.0);
+    Polyline polyline(vector<Point>{Point(-4.0, 4.0), Point(4.0, 4.0), Point(0.0, 8.0), Point(0.0, 0.0)});
+    vector<Point> exp_points{Point(0.0, 4.0)};
+    auto exp_vec_size = (int) exp_points.size();
+    vector<Point> res(polyline.intersect(circle));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
   SECTION("Polyline polyline intersection 1") {
     Polyline p1(vector<Point>{Point(-4.0, 0.0), Point(-2.0, 2.0), Point(0.0, 0.0), Point(2.0, 2.0),
                               Point(4.0, 0.0), Point(2.0, -2.0), Point(-2.0, -2.0), Point(-4.0, 0.0)}),
@@ -237,16 +274,14 @@ TEST_CASE("Polyline's tests", "[]") {
       REQUIRE(res[i] == exp_points[i]);
     }
   }
-  
+
 }
 TEST_CASE("Other's tests", "[]") {
   vector<Figure*> figures;
   Segment* segment = new Segment(-1.0, 6.0, -1.0, 8.0);
   Circle* circle = new Circle(Point(-1.0, 4.0), 3.0);
-  Figure* figure = (Figure*) segment;
-  figures.push_back(figure);
-  figure = (Figure*) circle;
-  figures.push_back(figure);
+  figures.push_back((Figure*) segment);
+  figures.push_back((Figure*) circle);
   vector<Point> exp_points{Point(-1.0, 7.0)};
   auto exp_vec_size = (int) exp_points.size();
   vector<Point> res(figures[0]->intersect(*figures[1]));
