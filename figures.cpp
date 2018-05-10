@@ -110,9 +110,19 @@ vector<Point> Segment::intersect(const figures::Circle& _cc) const {
       d = fabs(a * p + b * q + c) / sqrt(a * a + b * b);
 
   if (d <= r) {
-    double k = b * b * p - a * (b * q + c), s = a * a + b * b, t = b * sqrt(r * r * s - pow(a * p + b * q + c, 2)),
-        x1 = (k + t) / s, y1 = (-1) * (a * x1 + c) / b,
-        x2 = (k - t) / s, y2 = (-1) * (a * x2 + c) / b;
+    double x1, y1, x2, y2;
+    if (b == 0) {
+      y1 = q + sqrt((r - c / a - p) * (r + c / a + p));
+      x1 = (-1) * c / a;
+      y2 = q - sqrt((r - c / a - p) * (r + c / a + p));
+      x2 = (-1) * c / a;
+    } else {
+      double k = b * b * p - a * (b * q + c), s = a * a + b * b, t = b * sqrt(r * r * s - pow(a * p + b * q + c, 2));
+      x1 = (k + t) / s;
+      y1 = (-1) * (a * x1 + c) / b;
+      x2 = (k - t) / s;
+      y2 = (-1) * (a * x2 + c) / b;
+    }
     if (d == r) {
       Point point(x1, y1);
       if (this->belong(point)) { answer.push_back(point); }
@@ -212,7 +222,25 @@ vector<Point> Circle::intersect(const figures::Circle& _cc) const {
   }
 }
 
-vector<Point> Circle::intersect(const figures::Polyline& _cp) const { return _cp.intersect(*this); }
+vector<Point> Circle::intersect(const figures::Polyline& _cp) const {
+  vector<Point> answer, points{_cp.getPoints()};
+  for (int i = 0; i < points.size() - 1; ++i) {
+    vector<Point> tmp = this->intersect(Segment(points[i], points[i + 1]));
+    for (auto& item : tmp) {
+      bool flag = true;
+      for (int k = 0; flag && (k < answer.size()); ++k) {
+        if (item == answer[k]) {
+          flag = false;
+        }
+      }
+      if (flag) {
+        answer.push_back(item);
+      }
+    }
+//    tmp.clear();
+  }
+  return answer;
+}
 
 void Circle::recalculateLength() { length_ = 2 * M_PI * r_; }
 

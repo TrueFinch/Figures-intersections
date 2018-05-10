@@ -124,10 +124,39 @@ TEST_CASE("Segment's tests", "[]") {
     vector<Point> res(segment.intersect(polyline));
     REQUIRE(res.size() == exp_vec_size);
   }
+  SECTION("Segment polyline intersection 2") {
+    Segment segment(-7.0, 2.0, 3.0, 2.0);
+    vector<Point> exp_points{Point(-5.0, 2.0), Point(-3.0, 2.0), Point(0.0, 2.0)};
+    int exp_vec_size = (int) exp_points.size();
+    vector<Point> res(segment.intersect(polyline));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
+  SECTION("Segment polyline intersection 3") {
+    Segment segment(-3.0, -2.0, -1.0, 0.0);
+    double exp_vec_size = 0;
+    vector<Point> res(segment.intersect(polyline));
+    REQUIRE(res.size() == exp_vec_size);
+  }
 }
 
 TEST_CASE("Circle's tests", "[]") {
   SECTION("Getters&Setters") {}
   SECTION("Length") {}
   SECTION("Belong") {}
+  Circle circle(Point(-1.0, 4.0), 3.0);
+  SECTION("Circle polyline intersection 1") {
+    Polyline polyline(vector<Point>{Point(-5.0, 4.0), Point(-3.0, 4.0), Point(-1.0, 6.0),
+                                    Point(-1.0, 8.0), Point(2.0, 8.0), Point(2.0, 2.0),
+                                    Point(-1.0, -1.0), Point(-1.0, 2.0)});
+    vector<Point> exp_points{Point(-4.0, 4.0), Point(-1, 7.0), Point(2.0, 4.0), Point(-1.0, 1.0)};
+    int exp_vec_size = (int) exp_points.size();
+    vector<Point> res(circle.intersect(polyline));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
 }
