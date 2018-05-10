@@ -173,12 +173,12 @@ double Circle::getRadius() const { return r_; }
 
 Point Circle::getCenter() const { return c_; }
 
-void Circle::setRadius(double& r) {
+void Circle::setRadius(const double& r) {
   r_ = r;
   recalculateLength();
 }
 
-void Circle::setCenter(Point& c) {
+void Circle::setCenter(const Point& c) {
   c_ = c;
   recalculateLength();
 }
@@ -218,8 +218,8 @@ vector<Point> Circle::intersect(const figures::Circle& _cc) const {
         x2 = (u - v - root) / (4 * cx2), y2 = (u - v) / (2 * cx2) + x2;
     answer.emplace_back(Point(x1, y1));
     if ((x1 != x2) and (y1 != y2)) { answer.emplace_back(Point(x2, y2)); }
-    return answer;
   }
+  return answer;
 }
 
 vector<Point> Circle::intersect(const figures::Polyline& _cp) const {

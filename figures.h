@@ -61,8 +61,8 @@ class Circle: Figure {
 	Circle(const Point& c, const double& r);
 	double getRadius() const;
 	Point getCenter() const;
-	void setRadius(double& r);
-	void setCenter(Point& c);
+	void setRadius(const double& r);
+	void setCenter(const Point& c);
 	double length() const override;
 	bool belong(const Point&) const override;
 	vector<Point> intersect(const Figure&) const override;
