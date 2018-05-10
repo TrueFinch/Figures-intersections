@@ -33,7 +33,7 @@ Segment::Segment(const Point& a, const Point& b) : pa_{a}, pb_{b} {
   this->recalculateLength();
 }
 
-Segment::Segment(const double& x1, const double& y1, const double& x2, const double& y2): pa_{x1, y1}, pb_{x2, y2} {
+Segment::Segment(const double& x1, const double& y1, const double& x2, const double& y2) : pa_{x1, y1}, pb_{x2, y2} {
   this->recalculateParameters();
   this->recalculateLength();
 }
@@ -107,19 +107,23 @@ vector<Point> Segment::intersect(const figures::Circle& _cc) const {
   vector<Point> answer;
   vector<double> v(this->getParameters());
   double a = v[0], b = v[1], c = v[2], p = _cc.getCenter().x, q = _cc.getCenter().y, r = _cc.getRadius(),
-      d = pow(fabs(a * p + b * q + c), 2) / (a * a + b * b);
+      d = fabs(a * p + b * q + c) / sqrt(a * a + b * b);
 
   if (d <= r) {
-    double k = (-1) * a / b, s = (-1) * c / b, t = q - p, x = (p + k * t) / (1 + k * k), y = k * x + s;
+    double k = b * b * p - a * (b * q + c), s = a * a + b * b, t = b * sqrt(r * r * s - pow(a * p + b * q + c, 2)),
+        x1 = (k + t) / s, y1 = (-1) * (a * x1 + c) / b,
+        x2 = (k - t) / s, y2 = (-1) * (a * x2 + c) / b;
     if (d == r) {
-      Point point(x, y);
+      Point point(x1, y1);
       if (this->belong(point)) { answer.push_back(point); }
     } else if (d < r) {
-      double
-          u = sqrt((2 * k + t) * t - (p * p - r * r) * k * k + r * r) / (1 + k * k);
-      Point p1(x + u, k * (x + u)), p2(x - u, k * (x - u));
-      if (this->belong(p1)) { answer.push_back(p1); }
-      if (this->belong(p2)) { answer.push_back(p2); }
+      Point p1(x1, y1), p2(x2, y2);
+      if (this->belong(p1)) {
+        answer.push_back(p1);
+      }
+      if (this->belong(p2)) {
+        answer.push_back(p2);
+      }
     }
   }
   return answer;
