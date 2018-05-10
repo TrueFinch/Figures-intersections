@@ -118,13 +118,25 @@ vector<Point> Segment::intersect(const figures::Circle& _cc) const {
       if (this->belong(point)) { answer.push_back(point); }
     } else if (d < r) {
       Point p1(x1, y1), p2(x2, y2);
-      if (this->belong(p1)) {
-        answer.push_back(p1);
-      }
-      if (this->belong(p2)) {
-        answer.push_back(p2);
-      }
+      if (this->belong(p1)) { answer.push_back(p1); }
+      if (this->belong(p2)) { answer.push_back(p2); }
     }
+  }
+  return answer;
+}
+
+vector<Point> Segment::intersect(const figures::Polyline& _cp) const {
+  vector<Point> answer, tmp, points{_cp.getPoints()};
+  for (int i = 0; i < points.size() - 1; ++i) {
+    tmp = this->intersect(Segment(points[i], points[i + 1]));
+    for (auto& item : tmp) {
+      bool flag = true;
+      for (int k = 0; flag && (k < answer.size()); ++k) {
+        if (item == answer[k]) { flag = false; }
+      }
+      if (flag) { answer.push_back(item); }
+    }
+    tmp.clear();
   }
   return answer;
 }
@@ -200,4 +212,40 @@ vector<Point> Circle::intersect(const figures::Circle& _cc) const {
   }
 }
 
+vector<Point> Circle::intersect(const figures::Polyline& _cp) const { return _cp.intersect(*this); }
+
 void Circle::recalculateLength() { length_ = 2 * M_PI * r_; }
+
+Polyline::Polyline(const vector<figures::Point>& points) : points_{points} {
+  recalculateLength();
+}
+
+vector<Point> Polyline::getPoints() const { return points_; }
+
+double Polyline::length() const { return len_; }
+
+bool Polyline::belong(const figures::Point& point) const {
+  bool res;
+  for (int i = 0; i < points_.size() - 1; ++i) {
+    res = Segment(points_[i], points_[i + 1]).belong(point);
+    if (res) {
+      return true;
+    }
+  }
+  return false;
+}
+
+vector<Point> Polyline::intersect(const Figure& _cf) const { return _cf.intersect(*this); }
+
+vector<Point> Polyline::intersect(const Segment& _cs) const { return _cs.intersect(*this); }
+
+vector<Point> Polyline::intersect(const Circle& _cc) const { return _cc.intersect(*this); }
+
+vector<Point> Polyline::intersect(const Polyline& _cp) const { return _cp.intersect(*this); }
+
+void Polyline::recalculateLength() {
+  len_ = 0.0;
+  for (int i = 0; i < points_.size() - 1; ++i) {
+    len_ += Segment(points_[i], points_[i + 1]).length();
+  }
+}

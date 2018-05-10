@@ -28,7 +28,7 @@ class Figure {
 	virtual vector<Point> intersect(const Figure&) const = 0;
 	virtual vector<Point> intersect(const Segment&) const = 0;
 	virtual vector<Point> intersect(const Circle&) const = 0;
-//	virtual vector<Point> intersect(const Polyline&) const = 0;
+	virtual vector<Point> intersect(const Polyline&) const = 0;
 	virtual ~Figure() = default;
 };
 
@@ -47,6 +47,7 @@ class Segment : Figure {
   vector<Point> intersect(const Figure&) const override;
 	vector<Point> intersect(const Segment&)  const override;
 	vector<Point> intersect(const Circle&) const override;
+	vector<Point> intersect(const Polyline&) const override;
  private:
 	void recalculateParameters();
 	void recalculateLength();
@@ -67,10 +68,28 @@ class Circle: Figure {
 	vector<Point> intersect(const Figure&) const override;
 	vector<Point> intersect(const Segment&) const override;
 	vector<Point> intersect(const Circle&) const override;
+	vector<Point> intersect(const Polyline&) const override;
  private:
 	void recalculateLength();
 	Point c_;
 	double r_ = 0, length_ = 0;
+};
+
+class Polyline: Figure {
+ public:
+  Polyline() = default;
+  Polyline(const vector<Point>& points);
+  vector<Point> getPoints() const;
+  double length() const override;
+  bool belong(const Point&) const override;
+  vector<Point> intersect(const Figure&) const override;
+  vector<Point> intersect(const Segment&) const override;
+  vector<Point> intersect(const Circle&) const override;
+  vector<Point> intersect(const Polyline&) const override;
+ private:
+  void recalculateLength();
+  vector<Point> points_;
+  double len_;
 };
 } // end namespace figures
 
