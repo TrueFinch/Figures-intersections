@@ -251,6 +251,17 @@ TEST_CASE("Polyline's tests", "[]") {
       REQUIRE(!polyline.belong(point));
     }
   }
+  SECTION("Polyline segment intersection 1") {
+    Segment segment(0.0, 0.0, 2.0, 2.0);
+    Polyline polyline(vector<Point>{Point(0.0, 4.0), Point(4.0, 0.0), Point(4.0, 2.0), Point(0.0, 2.0)});
+    vector<Point> exp_points{Point(2.0, 2.0)};
+    auto exp_vec_size = (int) exp_points.size();
+    vector<Point> res(polyline.intersect(segment));
+    REQUIRE(res.size() == exp_vec_size);
+    for (int i = 0; i < exp_vec_size; ++i) {
+      REQUIRE(res[i] == exp_points[i]);
+    }
+  }
   SECTION("Polyline circle intersection 1") {
     Circle circle(Point(0.0, 0.0), 4.0);
     Polyline polyline(vector<Point>{Point(-4.0, 4.0), Point(4.0, 4.0), Point(0.0, 8.0), Point(0.0, 0.0)});
@@ -280,11 +291,29 @@ TEST_CASE("Other's tests", "[]") {
   vector<Figure*> figures;
   Segment* segment = new Segment(-1.0, 6.0, -1.0, 8.0);
   Circle* circle = new Circle(Point(-1.0, 4.0), 3.0);
+  Polyline* polyline = new Polyline(vector<Point>{Point(-1.0, 1.0), Point(-1.0, 7.0), Point(-4.0, 4.0), Point(2.0, 4.0)});
   figures.push_back((Figure*) segment);
   figures.push_back((Figure*) circle);
+  figures.push_back((Figure*) polyline);
   vector<Point> exp_points{Point(-1.0, 7.0)};
   auto exp_vec_size = (int) exp_points.size();
   vector<Point> res(figures[0]->intersect(*figures[1]));
+  REQUIRE(res.size() == exp_vec_size);
+  for (int i = 0; i < exp_vec_size; ++i) {
+    REQUIRE(res[i] == exp_points[i]);
+  }
+  res = figures[1]->intersect(*figures[0]);
+  REQUIRE(res.size() == exp_vec_size);
+  for (int i = 0; i < exp_vec_size; ++i) {
+    REQUIRE(res[i] == exp_points[i]);
+  }
+  exp_points.clear();
+  exp_points.emplace_back(Point(-1.0, 7.0));
+  exp_points.emplace_back(Point(-1.0, 1.0));
+  exp_points.emplace_back(Point(-4.0, 4.0));
+  exp_points.emplace_back(Point(2.0, 4.0));
+  exp_vec_size = (int) exp_points.size();
+  res = figures[2]->intersect(*figures[1]);
   REQUIRE(res.size() == exp_vec_size);
   for (int i = 0; i < exp_vec_size; ++i) {
     REQUIRE(res[i] == exp_points[i]);
