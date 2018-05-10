@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <vector>
 
+#define EPS 2e-15
+
 using std::vector;
 
 namespace figures {
