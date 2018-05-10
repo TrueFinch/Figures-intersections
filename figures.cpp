@@ -25,7 +25,7 @@ const bool Point::operator<(const Point& rhs) const {
 }
 
 const bool Point::operator==(const Point& rhs) const {
-  return ((this->x == rhs.x) && (this->y == rhs.y));
+  return ((fabs(this->x - rhs.x) <= EPS) && (fabs(this->y - rhs.y) <= EPS));
 }
 
 Segment::Segment(const Point& a, const Point& b) : pa_{a}, pb_{b} {
@@ -192,32 +192,25 @@ vector<Point> Circle::intersect(const figures::Figure& _cf) const { return _cf.i
 vector<Point> Circle::intersect(const figures::Segment& _cs) const { return _cs.intersect(*this); }
 
 vector<Point> Circle::intersect(const figures::Circle& _cc) const {
+  vector<Point> answer;
   double
       cx1 = getCenter().x, cy1 = getCenter().y, cx2 = _cc.getCenter().x, cy2 = _cc.getCenter().y,
       r1 = getRadius(), r2 = _cc.getRadius(), d = Segment(Point(cx1, cy1), Point(cx2, cy2)).length();
-  vector<Point> answer;
 
-  if ((d > fabs(r1 + r2)) or (d < fabs(r1 - r2))) {
-//    circles lie separately or one circle is inside the other
-    return answer;
-  }
-  if ((cx1 == cx2) and (cy1 == cy2)) {
-    if (r1 == r2) {
-//      circles are same to each other
-      answer.emplace_back(Point(cx1 + getRadius(), cy1));
-      answer.emplace_back(Point(cx1 - getRadius(), cy1));
+  if (!((fabs(r1 - r2) > d) || (d > (r1 + r2)))) {
+    double b = (pow(r1, 2) - pow(r2, 2) + pow(d, 2)) / (2 * d);
+    double a = d - b;
+    Point p0(cx2 + a / d * (cx1 - cx2), cy2 + a / d * (cy1 - cy2));
+    if (d == (r2 + r1)) {
+      answer.push_back(p0);
+    } else {
+      double h = sqrt(pow(r2, 2) - pow(a, 2));
+      Point p3(p0.x + (cy1 - cy2) * h / d, p0.y - (cx1 - cx2) * h / d);
+      Point p4(p0.x - (cy1 - cy2) * h / d, p0.y + (cx1 - cx2) * h / d);
+      answer.push_back(p3);
+      answer.push_back(p4);
     }
-  } else {
-    cx2 -= cx1;
-    cy2 -= cy1;
-    double
-        u = (pow(cx2, 2) + pow(cy2, 2)),
-        v = (pow(r2, 2) - pow(r1, 2)),
-        root = sqrt(8 * pow(r1, 2) * pow(cx2, 2) - 4 * u * v - pow(u + v, 2)),
-        x1 = (u - v + root) / (4 * cx2), y1 = (u - v) / (2 * cx2) + x1,
-        x2 = (u - v - root) / (4 * cx2), y2 = (u - v) / (2 * cx2) + x2;
-    answer.emplace_back(Point(x1, y1));
-    if ((x1 != x2) and (y1 != y2)) { answer.emplace_back(Point(x2, y2)); }
+    return answer;
   }
   return answer;
 }
