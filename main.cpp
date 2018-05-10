@@ -1,13 +1,6 @@
-#include "figures.h"
 #include <iostream>
-#include <vector>
-#include <iterator>
-
-using namespace std;
 
 int main() {
-
-  vector<figures::Figure *> figures;
-
-  return 0;
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
 }
