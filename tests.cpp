@@ -288,13 +288,10 @@ TEST_CASE("Polyline's tests", "[]") {
 
 }
 TEST_CASE("Other's tests", "[]") {
-  vector<Figure*> figures;
-  Segment* segment = new Segment(-1.0, 6.0, -1.0, 8.0);
-  Circle* circle = new Circle(Point(-1.0, 4.0), 3.0);
-  Polyline* polyline = new Polyline(vector<Point>{Point(-1.0, 1.0), Point(-1.0, 7.0), Point(-4.0, 4.0), Point(2.0, 4.0)});
-  figures.push_back((Figure*) segment);
-  figures.push_back((Figure*) circle);
-  figures.push_back((Figure*) polyline);
+  vector<shared_ptr<Figure>> figures;
+  figures.emplace_back((Figure*) new Segment(-1.0, 6.0, -1.0, 8.0)); //make_shared<Figure>(Segment(-1.0, 6.0, -1.0, 8.0))
+  figures.emplace_back((Figure*) new Circle(Point(-1.0, 4.0), 3.0));
+  figures.emplace_back((Figure*) new Polyline({Point(-1.0, 1.0), Point(-1.0, 7.0), Point(-4.0, 4.0), Point(2.0, 4.0)}));
   vector<Point> exp_points{Point(-1.0, 7.0)};
   auto exp_vec_size = (int) exp_points.size();
   vector<Point> res(figures[0]->intersect(*figures[1]));
@@ -308,7 +305,7 @@ TEST_CASE("Other's tests", "[]") {
     REQUIRE(res[i] == exp_points[i]);
   }
   exp_points.clear();
-  exp_points.emplace_back(Point(-1.0, 7.0));
+  exp_points.emplace_back(-1.0, 7.0);
   exp_points.emplace_back(Point(-1.0, 1.0));
   exp_points.emplace_back(Point(-4.0, 4.0));
   exp_points.emplace_back(Point(2.0, 4.0));
